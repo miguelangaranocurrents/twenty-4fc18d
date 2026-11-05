@@ -52,13 +52,18 @@ export const useUpdateViewFromCurrentState = () => {
       return;
     }
 
-    store.set(viewPickerIsPersistingCallbackState, true);
-    store.set(viewPickerIsDirtyCallbackState, false);
-    store.set(viewPickerModeCallbackState, 'list');
-
     const viewPickerReferenceViewId = store.get(
       viewPickerReferenceViewIdCallbackState,
     );
+
+    // No view picked in the picker (e.g. Enter from the options menu): there is nothing to persist
+    if (viewPickerReferenceViewId === '') {
+      return;
+    }
+
+    store.set(viewPickerIsPersistingCallbackState, true);
+    store.set(viewPickerIsDirtyCallbackState, false);
+    store.set(viewPickerModeCallbackState, 'list');
     const viewPickerInputName = store.get(viewPickerInputNameCallbackState);
     const viewPickerSelectedIcon = store.get(
       viewPickerSelectedIconCallbackState,

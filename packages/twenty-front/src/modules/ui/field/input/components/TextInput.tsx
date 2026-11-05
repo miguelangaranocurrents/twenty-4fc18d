@@ -78,19 +78,21 @@ export const TextInput = ({
   const wrapperRef = useRef<HTMLInputElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
 
+  // Trimming happens on submit only: trimming while typing would drop each
+  // space the user types, since the trimmed text is written back to the input.
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setInternalText(getValue(event.target.value, shouldTrim));
-    onChange?.(getValue(event.target.value, shouldTrim));
+    setInternalText(event.target.value);
+    onChange?.(event.target.value);
   };
   useEffect(() => {
-    setInternalText(getValue(value, shouldTrim));
-  }, [value, shouldTrim]);
+    setInternalText(value);
+  }, [value]);
 
   useRegisterInputEvents({
     focusId: instanceId,
     inputRef: wrapperRef,
     copyRef: copyRef,
-    inputValue: internalText,
+    inputValue: getValue(internalText, shouldTrim),
     onEnter,
     onEscape,
     onClickOutside,

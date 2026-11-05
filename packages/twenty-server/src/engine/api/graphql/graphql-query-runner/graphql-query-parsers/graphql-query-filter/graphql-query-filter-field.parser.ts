@@ -60,6 +60,9 @@ export class GraphqlQueryFilterFieldParser {
     this.fieldIdByJoinColumnName = fieldMaps.fieldIdByJoinColumnName;
   }
 
+  // isNegated: the leaf sits under a "not" group, where a NULL field must not turn the negation into NULL
+  // (which would drop the row). "(condition) IS TRUE" inside NOT yields the NULL-as-match semantics of the
+  // client-side record matching.
   public parse(
     queryBuilder: WhereExpressionBuilder,
     outerQueryBuilder: WorkspaceSelectQueryBuilder,
@@ -69,6 +72,7 @@ export class GraphqlQueryFilterFieldParser {
     filterValue: any,
     isFirst = false,
     useDirectTableReference = false,
+    isNegated = false,
   ): void {
     const { fieldMetadata, isReferencedByFieldName } =
       resolveFilterKeyFieldMetadata({
@@ -151,10 +155,12 @@ export class GraphqlQueryFilterFieldParser {
       useDirectTableReference,
     });
 
+    const conditionSql = isNegated ? `(${sql}) IS TRUE` : sql;
+
     if (isFirst) {
-      queryBuilder.where(sql, params);
+      queryBuilder.where(conditionSql, params);
     } else {
-      queryBuilder.andWhere(sql, params);
+      queryBuilder.andWhere(conditionSql, params);
     }
   }
 
